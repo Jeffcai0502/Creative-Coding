@@ -1,6 +1,6 @@
 # Creative-Coding
 # URL: 
-## - Theme:
+## - Theme: Interactivity
 
 
 - My initial plan is
