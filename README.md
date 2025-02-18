@@ -284,6 +284,7 @@ Constructor: Initializes the ball's position, velocity, and radius.
 ```display()```: Draws the ball on the canvas.
 
 The Ball class manages the ball's movement, collision detection, and display. And also represents the sound bars that act as walls for the ball.
+
 ### Improving
 Changing the ball to free fall. And able to move left and right with sound pitch Improve the video Interactivity.
 
@@ -305,6 +306,39 @@ I realised an issue, when the ball reaches the absulute bottom of the screen, it
 I want to make an interative experience with out any touch, users are making impact to the art work without any need of pressing buttons or touch.
 
 And the audiance can feel the relation between sound, noise and inner peace. How it is different when you are in peace compared to “all noisy in side and out”. When everything is in peace,you will be able to see yourself better.
+
+I have added back the Color Shifts Based on Amplitude, to give contrast between quiet and noisy. Also added this to the ball, as it was the normal "focus" for people.
+
+Spent a lot of time tuning the bouncing and damping. The ball can even bounce on my hair(which is black).
+
+
+### Purpose: Initializes the properties of the ball.
+
+```
+constructor() {
+  this.pos = createVector(width / 2, 0);
+  this.vel = createVector(0, 0);
+  this.acc = createVector(0, 0.2); // Reduced gravity for slower fall
+  this.r = 15; // Make the ball slightly bigger
+  this.color = 255; // Default color
+}
+```
+
+### Key Properties:
+
+pos: Position of the ball.
+
+vel: Velocity of the ball.
+
+acc: Acceleration of the ball (gravity).
+
+r: Radius of the ball.
+
+color: Color of the ball.
+
+
+
+
 
 
 
