@@ -23,23 +23,29 @@ function setup() {
 function draw() {
   background(0);
   
-  // Draw inverted webcam feed full screen
-  push();
-  translate(width, 0);
-  scale(-1, 1);
-  image(webcam, 0, 0, width, height);
-  pop();
-  
   // Analyze sound input
   let spectrum = fft.analyze();
   let amplitude = fft.getEnergy("bass");
   let pitch = fft.getCentroid();
   
+  // Draw inverted webcam feed with more noticeable color shifts based on amplitude
+  push();
+  translate(width, 0);
+  scale(-1, 1);
+  let colorShift = map(amplitude, 0, 255, 0, 150); // Make color shift more noticeable and only when there is sound
+  if (amplitude > 0) {
+    tint(255 + colorShift, 255 - colorShift, 255 + colorShift); // Apply color shift
+  } else {
+    noTint(); // No color shift when quiet
+  }
+  image(webcam, 0, 0, width, height);
+  pop();
+  
   // Draw sound bars
   bars = [];
   for (let i = 0; i < spectrum.length; i++) {
     let x = map(i, 0, spectrum.length, 0, width);
-    let h = map(spectrum[i], 0, 255, 0, height / 2);
+    let h = map(spectrum[i], 0, 255, 0, height); // Make sound bars more sensitive
     bars.push(new Bar(x, height - h, 10, h));
     fill(0);
     noStroke();
@@ -53,17 +59,17 @@ function draw() {
   
   // Display instructions
   fill(255);
-  textSize(16);
+  textSize(20); // Make text slightly bigger
   textAlign(RIGHT, TOP);
-  text("Use your voice pitch to move the ball left and right.\nAvoid the black and dark areas!", width - 10, 10);
+  text("Use sound pitch to move the ball left and right.\nThe ball will bounce on black areas on camera!", width - 10, 10);
 }
 
 class Ball {
   constructor() {
     this.pos = createVector(width / 2, 0);
     this.vel = createVector(0, 0);
-    this.acc = createVector(0, 0.5); // Gravity
-    this.r = 10;
+    this.acc = createVector(0, 0.2); // Reduced gravity for slower fall
+    this.r = 15; // Make the ball slightly bigger
     this.color = 255; // Default color
   }
   
@@ -77,17 +83,23 @@ class Ball {
     
     // Constrain position to canvas
     this.pos.x = constrain(this.pos.x, this.r, width - this.r);
-    this.pos.y = constrain(this.pos.y, this.r, height - this.r);
     
-    // Change color based on amplitude
+    // Check if the ball hits the bottom of the screen
+    if (this.pos.y >= height - this.r) {
+      this.vel.y = -abs(this.vel.y) * 0.8; // Increase bounce factor
+      this.pos.y = height - this.r; // Ensure the ball stays within the canvas
+    }
+    
+    // Make color change more noticeable
     this.color = map(amplitude, 0, 255, 0, 255);
   }
   
   checkCollisions(bars) {
     for (let bar of bars) {
       if (this.pos.x > bar.x && this.pos.x < bar.x + bar.w &&
-          this.pos.y > bar.y && this.pos.y < bar.y + bar.h) {
-        this.vel.y *= -1;
+          this.pos.y + this.r > bar.y && this.pos.y - this.r < bar.y + bar.h) {
+        this.vel.y = -abs(this.vel.y) * 0.8; // Increase bounce factor when touching the sound bar
+        this.pos.y = bar.y - this.r; // Adjust position to be just above the bar
       }
     }
     
@@ -106,12 +118,11 @@ class Ball {
   }
   
   display() {
-    fill(this.color, 255 - this.color, 255); // Change color based on amplitude
+    fill(this.color, 255 - this.color, 255); // Make color change more noticeable
     noStroke();
     ellipse(this.pos.x, this.pos.y, this.r * 2);
   }
 }
-
 class Bar {
   constructor(x, y, w, h) {
     this.x = x;
