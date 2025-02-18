@@ -177,16 +177,52 @@ function setup() {
 Due to that the pixel isn't changing. and it is working. Just that the mic has noise cancelling aganist the sound that it is playing itslef.
 <img width="401" alt="截屏2025-02-18 上午11 02 17" src="https://github.com/user-attachments/assets/a53e2916-9be8-46b4-ba2d-d397e1e9362e" />
 ## Interactive game
-Made a pong game, a white ball bounce when touching walls, black part of the video input and the sound amplitude and frequency sound bars bellow.
+Made a not really working pong game, a white ball bounce when touching walls, black part of the video input and the sound amplitude and frequency sound bars bellow.
+
+![2025-02-1811 25 28-ezgif com-video-to-gif-converter](https://github.com/user-attachments/assets/008c7f66-f440-470c-aa0a-87aaab03655a)
+
+It is working as it should. But i don't like how it moves. It is not controllable at all.
 
 ```
- // Draw ball and check collisions
+
+function draw() {
+  background(0);
+  
+  // Draw webcam feed
+  image(webcam, 0, 0, width, height);
+  
+  // Analyze sound input
+  let spectrum = fft.analyze();
+  let amplitude = fft.getEnergy("bass");
+  
+  // Draw sound bars
+  bars = [];
+  for (let i = 0; i < spectrum.length; i++) {
+    let x = map(i, 0, spectrum.length, 0, width);
+    let h = map(spectrum[i], 0, 255, 0, height / 2);
+    bars.push(new Bar(x, height - h, 10, h));
+    fill(255);
+    noStroke();
+    rect(x, height - h, 10, h);
+  }
+  
+  // Draw ball and check collisions
   ball.update();
   ball.checkEdges();
   ball.checkCollisions(bars);
   ball.display();
 }
 
+```
+Webcam Feed: Draws the webcam feed on the canvas.
+
+Sound Analysis: Analyzes the sound input to get the frequency spectrum and amplitude of the bass frequencies.
+
+Sound Bars: Draws bars based on the frequency spectrum. These bars act as walls for the ball to bounce off.
+
+Ball Movement and Collision: Updates the ball's position, checks for collisions with the edges, sound bars, and black parts of the webcam feed, and then displays the ball.
+
+```
 class Ball {
   constructor() {
     this.pos = createVector(width / 2, height / 2);
@@ -197,7 +233,14 @@ class Ball {
   update() {
     this.pos.add(this.vel);
   }
-  
+
+```
+Constructor: Initializes the ball's position, velocity, and radius.
+
+```update()```: Updates the ball's position based on its velocity.
+
+```
+
   checkEdges() {
     if (this.pos.x < this.r || this.pos.x > width - this.r) {
       this.vel.x *= -1;
@@ -206,6 +249,61 @@ class Ball {
       this.vel.y *= -1;
     }
   }
-  ```
+
+```
+```checkEdges()```: Checks for collisions with the edges of the canvas and reverses the velocity if a collision is detected.
+
+```
+
+  checkCollisions(bars) {
+    for (let bar of bars) {
+      if (this.pos.x > bar.x && this.pos.x < bar.x + bar.w &&
+          this.pos.y > bar.y && this.pos.y < bar.y + bar.h) {
+        this.vel.y *= -1;
+      }
+    }
+    
+    // Check collisions with black parts of the webcam feed
+    webcam.loadPixels();
+    let index = (floor(this.pos.x) + floor(this.pos.y) * width) * 4;
+    if (webcam.pixels[index] == 0 && webcam.pixels[index + 1] == 0 && webcam.pixels[index + 2] == 0) {
+      this.vel.x *= -1;
+      this.vel.y *= -1;
+    }
+  }
+  
+  display() {
+    fill(255);
+    noStroke();
+    ellipse(this.pos.x, this.pos.y, this.r * 2);
+  }
+}
+```
+```checkCollisions(bars)```: Checks for collisions with the sound bars and black parts of the webcam feed. If a collision is detected, the ball's velocity is reversed.
+
+```display()```: Draws the ball on the canvas.
+
+The Ball class manages the ball's movement, collision detection, and display. And also represents the sound bars that act as walls for the ball.
+### Improving
+Changing the ball to free fall. And able to move left and right with sound pitch Improve the video Interactivity.
+
+last verson needs the most black on the webcam to bounce which was rare. Will incule grey. Also changing the sound bar to black
+
+Free Fall Ball Movement: The ball now falls freely due to gravity ```this.acc = createVector(0, 0.5)```
+
+Horizontal Movement: Added code to move the ball left or right based on the sound pitch.
+
+Edge Collision: Modified checkEdges to handle the ball hitting the bottom edge with damping.
+
+I may need to adjust the pitch range in the map function to better suit the microphone and sound environment. And optimize performance by reducing the canvas size or frame rate.
+
+![ezgif com-video-to-gif-converter](https://github.com/user-attachments/assets/5a3bfb62-0ea7-4819-881d-59d3e4f0ee7f)
+
+I realised an issue, when the ball reaches the absulute bottom of the screen, it cant bounce up any more. i will fix it by making it bounce up slightly when touching the bottom.
+
+
+
+
+
 
 
