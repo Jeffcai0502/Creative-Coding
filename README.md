@@ -299,7 +299,7 @@ I may need to adjust the pitch range in the map function to better suit the micr
 
 ![ezgif com-video-to-gif-converter](https://github.com/user-attachments/assets/5a3bfb62-0ea7-4819-881d-59d3e4f0ee7f)
 
-I realised an issue, when the ball reaches the absulute bottom of the screen, it cant bounce up any more. i will fix it by making it bounce up slightly when touching the bottom.
+I realised an issue, when the ball reaches the absulute bottom of the screen, it cant bounce up any more. i will fix it by making it bounce up slightly when touching the bottom. As shown in the gif above.
 
 
 
