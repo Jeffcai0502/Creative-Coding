@@ -235,6 +235,8 @@ class Ball {
   }
 
 ```
+Reference: https://p5js.org/reference/p5/class/
+
 Constructor: Initializes the ball's position, velocity, and radius.
 
 ```update()```: Updates the ball's position based on its velocity.
@@ -312,7 +314,7 @@ I have added back the Color Shifts Based on Amplitude, to give contrast between 
 Spent a lot of time tuning the bouncing and damping. The ball can even bounce on my hair(which is black).
 
 
-### Purpose: Initializes the properties of the ball.
+### Constructor Purpose: Initializes the properties of the ball.
 
 ```
 constructor() {
@@ -336,7 +338,109 @@ r: Radius of the ball.
 
 color: Color of the ball.
 
+### CheckCollisions Code Breakdown
+The checkCollisions method is designed to detect and handle collisions between the ball and the sound bars, as well as collisions with dark areas in the webcam feed. When a collision is detected, the ball's velocity is adjusted to simulate a bounce.
+```
+checkCollisions(bars) {
+  // Loop through each bar in the bars array
+  for (let bar of bars) {
+    // Check if the ball is colliding with the current bar
+    if (this.pos.x > bar.x && this.pos.x < bar.x + bar.w &&
+        this.pos.y + this.r > bar.y && this.pos.y - this.r < bar.y + bar.h) {
+      // Reverse the ball's vertical velocity and increase the bounce factor
+      this.vel.y = -abs(this.vel.y) * 1.2;
+      // Adjust the ball's position to be just above the bar
+      this.pos.y = bar.y - this.r;
+    }
+  }
+  
+  // Check collisions with black parts of the webcam feed only when falling
+  if (this.vel.y > 0) {
+    // Load the pixels from the webcam feed
+    webcam.loadPixels();
+    // Calculate the index of the pixel corresponding to the ball's position
+    let index = (floor(this.pos.x) + floor(this.pos.y) * width) * 4;
+    // Get the red, green, and blue values of the pixel
+    let r = webcam.pixels[index];
+    let g = webcam.pixels[index + 1];
+    let b = webcam.pixels[index + 2];
+    // Check if the pixel is dark (black or near black)
+    if (r < 50 && g < 50 && b < 50) {
+      // Reverse the ball's horizontal and vertical velocities
+      this.vel.x *= -1;
+      this.vel.y *= -1;
+    }
+  }
+}
+```
 
+### Loop Through Bars:
+
+```for (let bar of bars) {```
+
+The method starts by looping through each bar in the bars array.
+
+### Collision Detection with Bars:
+
+```
+if (this.pos.x > bar.x && this.pos.x < bar.x + bar.w &&
+    this.pos.y + this.r > bar.y && this.pos.y - this.r < bar.y + bar.h) {
+```
+
+This if statement checks if the ball is colliding with the current bar.
+
+The conditions ensure that the ball's position overlaps with the bar's position:
+
+this.pos.x > bar.x: The ball's x-coordinate is greater than the bar's left edge.
+
+this.pos.x < bar.x + bar.w: The ball's x-coordinate is less than the bar's right edge.
+
+this.pos.y + this.r > bar.y: The bottom of the ball is below the top of the bar.
+
+this.pos.y - this.r < bar.y + bar.h: The top of the ball is above the bottom of the bar.
+
+### Refrence that found on google which helped me.
+
+https://editor.p5js.org/mleisz/sketches/zNFvlBgbJ
+
+https://editor.p5js.org/simontiger/sketches/S1kfupErZ
+
+
+# Final outcome
+After adding the color shift. The ball really didn't wanted to bounce for a while
+
+But after playing around the numbers, i got it working fine in the end. As shown in the Gif below.
+![2025-02-182 05 04-ezgif com-video-to-gif-converter](https://github.com/user-attachments/assets/d72441d2-39da-4f1b-b1f4-35db908010c3)
+
+Here is the [final outcome](https://jeffcai0502.github.io/Creative-Coding/). 
+
+The ball interactives with audiance without any kind of touch. Intentionly simple design. Could just sit there open, and see what different people walking pass will feel about this work. And what enlightenment they  can feel from the contrasts 
+
+# Future development 
+- Enhanced Interaction with Sound
+Dynamic Sound Bars would be cool, Make the sound bars change color or size dynamically based on the amplitude or frequency of the sound.
+
+- Advanced Visual Effects
+Maybe it would be nice to add particle effects when the ball bounces off the sound bars or the bottom of the canvas. The art work may seem less boring in that way.
+
+Trail Effect: Create a trail effect for the ball to visualize its path more clearly.
+
+Althought making it simple was intentional also.
+
+
+- Improved Collision Detection
+The Collision Detection and bouncing "phyics" can definitly be better, So tht it can be more fun and less buggy. Sometimes it is still too funky
+
+- Game Mechanics
+Scoring System or objective or challenge. Will keep the audiance more interested for longer.
+
+# Reflection
+
+- Workshop task was super usefull, most of the functions was learnet during workshop paratices. For example the Webcam and filters, it made learning P5js so much easier.
+- It was very fun to combine different functions that i learnt during workshop to create a unique interactive experience.
+- Really helped me develop and refine my technical skills.
+- However tunning spent far more time then i expected. it wasn't easy to fine tune the experience to exactly the way i wanted. Anything that had a little bit to do with phyics can be very buggy and hard to make. Which was not planned before hand, both skill and time wise. Or i could spend more time working or polishing on other parts. Or even new functions.
+- All and all was very rewarding and fun. Looking back was defintly an achievement.
 
 
 
