@@ -3,7 +3,7 @@ let ball;
 let bars = [];
 
 function setup() {
-  createCanvas(800, 600);
+  createCanvas(windowWidth, windowHeight);
   
   // Set up microphone input
   mic = new p5.AudioIn();
@@ -13,7 +13,7 @@ function setup() {
   
   // Set up webcam input
   webcam = createCapture(VIDEO);
-  webcam.size(width, height);
+  webcam.size(windowWidth, windowHeight); // Set resolution to full screen
   webcam.hide(); // Hide the default video element
   
   // Initialize ball
@@ -23,11 +23,16 @@ function setup() {
 function draw() {
   background(0);
   
-  // Draw webcam feed
+  // Draw inverted webcam feed full screen
+  push();
+  translate(width, 0);
+  scale(-1, 1);
   image(webcam, 0, 0, width, height);
+  pop();
   
   // Analyze sound input
   let spectrum = fft.analyze();
+  let amplitude = fft.getEnergy("bass");
   let pitch = fft.getCentroid();
   
   // Draw sound bars
@@ -42,10 +47,15 @@ function draw() {
   }
   
   // Draw ball and check collisions
-  ball.update(pitch);
-  ball.checkEdges();
+  ball.update(pitch, amplitude);
   ball.checkCollisions(bars);
   ball.display();
+  
+  // Display instructions
+  fill(255);
+  textSize(16);
+  textAlign(RIGHT, TOP);
+  text("Use your voice pitch to move the ball left and right.\nAvoid the black and dark areas!", width - 10, 10);
 }
 
 class Ball {
@@ -54,9 +64,10 @@ class Ball {
     this.vel = createVector(0, 0);
     this.acc = createVector(0, 0.5); // Gravity
     this.r = 10;
+    this.color = 255; // Default color
   }
   
-  update(pitch) {
+  update(pitch, amplitude) {
     this.vel.add(this.acc);
     this.pos.add(this.vel);
     
@@ -66,13 +77,10 @@ class Ball {
     
     // Constrain position to canvas
     this.pos.x = constrain(this.pos.x, this.r, width - this.r);
-  }
-  
-  checkEdges() {
-    if (this.pos.y > height - this.r) {
-      this.pos.y = height - this.r;
-      this.vel.y *= -0.5; // Bounce back with damping
-    }
+    this.pos.y = constrain(this.pos.y, this.r, height - this.r);
+    
+    // Change color based on amplitude
+    this.color = map(amplitude, 0, 255, 0, 255);
   }
   
   checkCollisions(bars) {
@@ -83,20 +91,22 @@ class Ball {
       }
     }
     
-    // Check collisions with black and grey parts of the webcam feed
-    webcam.loadPixels();
-    let index = (floor(this.pos.x) + floor(this.pos.y) * width) * 4;
-    let r = webcam.pixels[index];
-    let g = webcam.pixels[index + 1];
-    let b = webcam.pixels[index + 2];
-    if ((r < 50 && g < 50 && b < 50) || (r > 100 && r < 150 && g > 100 && g < 150 && b > 100 && b < 150)) {
-      this.vel.x *= -1;
-      this.vel.y *= -1;
+    // Check collisions with black parts of the webcam feed only when falling
+    if (this.vel.y > 0) {
+      webcam.loadPixels();
+      let index = (floor(this.pos.x) + floor(this.pos.y) * width) * 4;
+      let r = webcam.pixels[index];
+      let g = webcam.pixels[index + 1];
+      let b = webcam.pixels[index + 2];
+      if (r < 50 && g < 50 && b < 50) { // Only bounce off black and dark colors
+        this.vel.x *= -1;
+        this.vel.y *= -1;
+      }
     }
   }
   
   display() {
-    fill(255);
+    fill(this.color, 255 - this.color, 255); // Change color based on amplitude
     noStroke();
     ellipse(this.pos.x, this.pos.y, this.r * 2);
   }
@@ -109,4 +119,8 @@ class Bar {
     this.w = w;
     this.h = h;
   }
+}
+
+function windowResized() {
+  resizeCanvas(windowWidth, windowHeight);
 }
