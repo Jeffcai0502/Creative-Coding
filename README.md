@@ -301,6 +301,13 @@ I may need to adjust the pitch range in the map function to better suit the micr
 
 I realised an issue, when the ball reaches the absulute bottom of the screen, it cant bounce up any more. i will fix it by making it bounce up slightly when touching the bottom. As shown in the gif above.
 
+## Theme Goal
+I want to make an interative experience with out any touch, users are making impact to the art work without any need of pressing buttons or touch.
+
+And the audiance can feel the relation between sound, noise and inner peace. How it is different when you are in peace compared to “all noisy in side and out”. When everything is in peace,you will be able to see yourself better.
+
+
+
 
 
 
